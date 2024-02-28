@@ -23,7 +23,10 @@ Modulo para habilitar llamadas y juegos en linea.
 
 #### Instalacion
 
-Instalación：`wget https://raw.githubusercontent.com/PhoenixxZ2023/badvpnpowermx/master/easyinstall && bash easyinstall`
+Instalación：
+````
+wget https://raw.githubusercontent.com/PhoenixxZ2023/badvpnpowermx/master/easyinstall && bash easyinstall
+````
 
 ##### Uso
 
