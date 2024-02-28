@@ -1,0 +1,83 @@
+#!/bin/bash
+
+# Verifica se o BadVPN já está instalado
+if [ ! -f "/bin/badvpn-udpgw" ]; then
+    echo "BadVPN não está instalado. Execute 'badvpn install' para instalar."
+    exit 1
+fi
+
+if [ "$1" == uninstall ]; then
+    echo 'Desinstalando BadVPN'
+    rm -f /bin/badvpn
+    rm -f /bin/badvpn-udpgw
+    echo 'Desinstalação completa'
+fi
+
+if [ "$1" == start ]; then
+    /bin/badvpn-udpgw --listen-addr 127.0.0.1:7300 --max-clients 1000 --max-connections-for-client 1000 --client-socket-sndbuf 0 --udp-mtu 9000 &
+    echo 'Badvpn iniciando no endereço 127.0.0.1:7300'
+fi
+
+if [ "$1" == stop ]; then
+    badvpnpid="$(ps x | grep badvpn-udpgw | grep -v grep | awk '{print $1}')"
+    if [ -n "$badvpnpid" ]; then
+        kill -9 "$badvpnpid" >/dev/null 2>/dev/null
+        echo 'Badvpn parado'
+    else
+        echo 'Badvpn não está em execução'
+    fi
+fi
+
+if [ "$1" == "uninstall" ] || [ "$1" == "start" ] || [ "$1" == "stop" ]; then
+    exit
+fi
+
+if [ "$1" == bdvpn ]; then
+    while true; do
+        echo "Menu BadVPN"
+        echo "1. Iniciar BadVPN"
+        echo "2. Parar BadVPN"
+        echo "3. Desinstalar BadVPN"
+        echo "4. Sair"
+        read -p "Selecione uma opção: " option
+        case $option in
+            1)
+                bash $0 start
+                ;;
+            2)
+                bash $0 stop
+                ;;
+            3)
+                bash $0 uninstall
+                ;;
+            4)
+                break
+                ;;
+            *)
+                echo "Opção inválida"
+                ;;
+        esac
+    done
+    exit
+fi
+
+# Configurar o serviço systemd
+cat <<EOF > /etc/systemd/system/badvpn.service
+[Unit]
+Description=BadVPN UDP Gateway
+After=network.target
+
+[Service]
+ExecStart=/bin/badvpn-udpgw --listen-addr 127.0.0.1:7300 --max-clients 1000 --max-connections-for-client 1000 --client-socket-sndbuf 0 --udp-mtu 9000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable badvpn.service
+systemctl start badvpn.service
+
+echo "Serviço systemd do BadVPN instalado e iniciado com sucesso."
+echo "Instalação concluída. Para acessar o menu do BadVPN, digite 'bdvpn'."
