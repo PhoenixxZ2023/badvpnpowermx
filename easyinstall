@@ -1,5 +1,17 @@
 #!/bin/bash
 
+if [ "$1" == install ]; then
+    echo 'Instalando BadVPN'
+    if [ ! -f "/bin/badvpn-udpgw" ]; then
+        wget -O /bin/badvpn-udpgw https://raw.githubusercontent.com/powermx/badvpn/master/badvpn-udpgw &>/dev/null
+        chmod +x /bin/badvpn-udpgw
+        echo 'BadVPN instalado com sucesso'
+    else
+        echo 'BadVPN já está instalado'
+    fi
+    exit
+fi
+
 # Verifica se o BadVPN já está instalado
 if [ ! -f "/bin/badvpn-udpgw" ]; then
     echo "BadVPN não está instalado. Execute 'badvpn install' para instalar."
